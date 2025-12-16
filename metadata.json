@@ -1,5 +1,5 @@
 {
-  "name": "LendLedger",
+  "name": "Debt Ledger",
   "description": "A personal lending management application to track loans, calculate interest, record repayments, and visualize outstanding balances with AI-powered insights.",
   "requestFramePermissions": []
 }

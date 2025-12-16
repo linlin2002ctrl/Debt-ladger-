@@ -19,7 +19,10 @@ import {
   ShieldCheck,
   LogOut,
   AlertTriangle,
-  Timer
+  Timer,
+  Calendar,
+  CheckCircle2,
+  Activity
 } from 'lucide-react';
 import { 
   BarChart, 
@@ -30,7 +33,7 @@ import {
   Tooltip, 
   ResponsiveContainer
 } from 'recharts';
-import { Borrower } from './types';
+import { Borrower, Transaction } from './types';
 import { saveEncryptedData, loadRawData, hasData, clearData } from './services/storage';
 import { encryptData, decryptData } from './utils/encryption';
 import { calculateSummary, formatCurrency, formatDate } from './utils/calculations';
@@ -186,6 +189,22 @@ const LockScreen = ({
       </div>
     </div>
   );
+};
+
+// Helper function for status badge styling
+const getStatusParams = (remainingBalance: number) => {
+  if (remainingBalance <= 0) {
+    return { 
+      label: 'Paid Off', 
+      className: 'bg-emerald-100 text-emerald-700 border-emerald-200', 
+      icon: <CheckCircle2 size={12} strokeWidth={2.5} /> 
+    };
+  }
+  return { 
+    label: 'Active', 
+    className: 'bg-blue-50 text-blue-700 border-blue-200', 
+    icon: <Activity size={12} strokeWidth={2.5} /> 
+  };
 };
 
 export default function App() {
@@ -559,9 +578,9 @@ export default function App() {
       <nav className="hidden md:flex flex-col fixed left-0 top-0 bottom-0 w-64 bg-white border-r border-gray-200 p-4 z-10">
         <div className="flex items-center gap-2 mb-8 px-2">
           <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold">
-            L
+            D
           </div>
-          <span className="text-xl font-bold text-gray-800">LendLedger</span>
+          <span className="text-xl font-bold text-gray-800">Debt Ledger</span>
         </div>
         
         <div className="space-y-1">
@@ -607,7 +626,7 @@ export default function App() {
 
       {/* Mobile Top Bar */}
       <div className="md:hidden bg-white p-4 flex justify-between items-center sticky top-0 z-20 border-b">
-        <span className="font-bold text-lg text-gray-800">LendLedger</span>
+        <span className="font-bold text-lg text-gray-800">Debt Ledger</span>
         <div className="flex gap-2">
           <button onClick={handleLock} className="p-2 text-gray-500 hover:bg-gray-100 rounded-full">
             <Lock size={20} />
@@ -721,6 +740,7 @@ export default function App() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {filteredBorrowers.map(b => {
                 const s = calculateSummary(b);
+                const status = getStatusParams(s.remainingBalance);
                 return (
                   <div key={b.id} onClick={() => { setSelectedBorrowerId(b.id); setView('details'); }} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 cursor-pointer hover:shadow-md transition-shadow relative overflow-hidden group">
                     <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -728,7 +748,12 @@ export default function App() {
                     </div>
                     <div className="flex justify-between items-start mb-4">
                       <div>
-                        <h3 className="text-lg font-bold text-gray-900">{b.name}</h3>
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="text-lg font-bold text-gray-900">{b.name}</h3>
+                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide border flex items-center gap-1 ${status.className}`}>
+                             {status.icon} {status.label}
+                          </span>
+                        </div>
                         <p className="text-sm text-gray-500">Since {formatDate(b.startDate)}</p>
                       </div>
                       <div className="bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full text-xs font-bold">
@@ -874,7 +899,17 @@ export default function App() {
                   <ArrowDownLeft className="rotate-45" />
                 </button>
                 <div>
-                  <h1 className="text-2xl font-bold text-gray-900">{selectedBorrower.name}</h1>
+                  <div className="flex items-center gap-3">
+                    <h1 className="text-2xl font-bold text-gray-900">{selectedBorrower.name}</h1>
+                    {(() => {
+                      const status = getStatusParams(selectedSummary.remainingBalance);
+                      return (
+                         <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide border flex items-center gap-1.5 ${status.className}`}>
+                            {status.icon} {status.label}
+                         </span>
+                      );
+                    })()}
+                  </div>
                   <p className="text-gray-500 text-sm">Loan started {formatDate(selectedBorrower.startDate)}</p>
                 </div>
               </div>
@@ -1018,32 +1053,64 @@ export default function App() {
 
                   {/* Transaction History */}
                   <div className="lg:col-span-2">
-                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                      <div className="p-4 bg-gray-50 border-b border-gray-200">
-                        <h3 className="font-bold text-gray-800">Transaction History</h3>
+                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col h-full max-h-[600px]">
+                      <div className="p-4 bg-white border-b border-gray-100 flex justify-between items-center sticky top-0 z-10">
+                        <h3 className="font-bold text-gray-800">History</h3>
+                        <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">{selectedBorrower.transactions.length} Transactions</span>
                       </div>
-                      <div className="divide-y divide-gray-100">
-                        {selectedBorrower.transactions.map((t) => (
-                          <div key={t.id} className="p-4 flex justify-between items-center hover:bg-gray-50 transition-colors">
-                            <div className="flex items-center gap-3">
-                              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${t.type === 'LOAN' ? 'bg-red-100 text-red-600' : 'bg-emerald-100 text-emerald-600'}`}>
-                                {t.type === 'LOAN' ? <ArrowUpRight size={16} /> : <ArrowDownLeft size={16} />}
-                              </div>
-                              <div>
-                                <p className="text-sm font-medium text-gray-900">{t.type === 'LOAN' ? 'Issued Loan' : 'Repayment Received'}</p>
-                                <p className="text-xs text-gray-500">{formatDate(t.date)}</p>
-                                {t.note && (
-                                  <p className="text-xs text-gray-500 mt-1 italic bg-gray-50 p-1 rounded border border-gray-100 inline-block">
-                                    {t.note}
-                                  </p>
-                                )}
-                              </div>
-                            </div>
-                            <span className={`font-mono font-medium ${t.type === 'LOAN' ? 'text-red-600' : 'text-emerald-600'}`}>
-                              {t.type === 'LOAN' ? '-' : '+'}{formatCurrency(t.amount)}
-                            </span>
-                          </div>
-                        ))}
+                      <div className="overflow-y-auto custom-scrollbar">
+                        {(() => {
+                           // Logic to group by date
+                           const sorted = [...selectedBorrower.transactions].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+                           const groups: Record<string, typeof selectedBorrower.transactions> = {};
+                           sorted.forEach(t => {
+                             if (!groups[t.date]) groups[t.date] = [];
+                             groups[t.date].push(t);
+                           });
+                           
+                           if (Object.keys(groups).length === 0) {
+                             return <div className="p-8 text-center text-gray-400">No transactions yet.</div>;
+                           }
+
+                           return Object.keys(groups).map(date => (
+                             <div key={date}>
+                               <div className="bg-gray-50 px-4 py-2 text-xs font-bold text-gray-500 uppercase tracking-wider sticky top-0 border-b border-gray-100 flex items-center gap-2">
+                                 <Calendar size={12} />
+                                 {formatDate(date)}
+                               </div>
+                               <div className="divide-y divide-gray-50">
+                                 {groups[date].map(t => (
+                                   <div key={t.id} className="p-4 flex justify-between items-center hover:bg-gray-50 transition-colors group">
+                                     <div className="flex items-center gap-4">
+                                       <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 shadow-sm ${
+                                          t.type === 'LOAN' 
+                                            ? 'bg-white border-red-100 text-red-500' 
+                                            : 'bg-white border-emerald-100 text-emerald-500'
+                                       }`}>
+                                         {t.type === 'LOAN' ? <ArrowUpRight size={20} strokeWidth={2.5} /> : <ArrowDownLeft size={20} strokeWidth={2.5} />}
+                                       </div>
+                                       <div>
+                                         <p className={`text-sm font-bold ${t.type === 'LOAN' ? 'text-gray-900' : 'text-gray-900'}`}>
+                                           {t.type === 'LOAN' ? 'Loan Given' : 'Payment Received'}
+                                         </p>
+                                         {t.note && (
+                                           <p className="text-xs text-gray-500 mt-0.5 max-w-[200px] truncate">
+                                             {t.note}
+                                           </p>
+                                         )}
+                                       </div>
+                                     </div>
+                                     <div className="text-right">
+                                       <span className={`text-base font-bold font-mono ${t.type === 'LOAN' ? 'text-red-600' : 'text-emerald-600'}`}>
+                                         {t.type === 'LOAN' ? '-' : '+'}{formatCurrency(t.amount)}
+                                       </span>
+                                     </div>
+                                   </div>
+                                 ))}
+                               </div>
+                             </div>
+                           ));
+                        })()}
                       </div>
                     </div>
                   </div>
