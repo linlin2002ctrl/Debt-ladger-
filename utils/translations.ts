@@ -1,0 +1,220 @@
+export type Language = 'en' | 'mm';
+
+export const translations = {
+  en: {
+    appTitle: "Debt Ledger",
+    // Auth
+    secureLedger: "Secure Your Ledger",
+    encryptedVault: "Encrypted Vault",
+    createPin: "Create a PIN. This will be used to encrypt your data.",
+    enterPinDesc: "Enter PIN to decrypt and access your data.",
+    enterPin: "Enter PIN",
+    confirmPin: "Confirm PIN",
+    decryptUnlock: "Decrypt & Unlock",
+    encryptStart: "Encrypt & Start",
+    processing: "Processing...",
+    forgotPin: "Forgot PIN?",
+    emergencyReset: "Emergency Reset",
+    resetWarning: "To protect your privacy, resetting your PIN will permanently delete all data.",
+    deleteReset: "Delete All Data & Reset",
+    cancel: "Cancel",
+    pinError: "PIN must be at least 4 digits",
+    pinMismatch: "PINs do not match",
+    authError: "Incorrect PIN or Data Corruption.",
+    
+    // Nav
+    dashboard: "Dashboard",
+    borrowers: "Borrowers",
+    newLoan: "New Loan",
+    askAssistant: "Ask Assistant",
+    lockNow: "Lock Now",
+    
+    // Dashboard
+    financialOverview: "Financial Overview",
+    trackPortfolio: "Track your lending portfolio performance",
+    totalLent: "Total Lent",
+    totalRepaid: "Total Repaid",
+    totalInterest: "Total Interest",
+    outstandingBalance: "Outstanding Balance",
+    portfolioDist: "Portfolio Distribution",
+    noActiveLoans: "No active loans",
+    createOne: "Create one now",
+    recentBorrowers: "Recent Borrowers",
+    viewAll: "View All",
+    noData: "No data found.",
+    due: "Due",
+    fixedAmount: "Fixed Amount",
+    
+    // Borrowers List
+    allBorrowers: "All Borrowers",
+    searchPlaceholder: "Search by name...",
+    noMatch: "No borrowers match your search.",
+    clearSearch: "Clear search",
+    noBorrowersYet: "No borrowers yet.",
+    since: "Since",
+    interest: "Interest",
+    balanceDue: "Balance Due",
+    
+    // Status
+    active: "Active",
+    paidOff: "Paid Off",
+    
+    // New Loan / Edit
+    issueNewLoan: "Issue New Loan",
+    borrowerName: "Borrower Name",
+    principalAmount: "Principal Amount",
+    fixedInterestLabel: "Fixed Interest ($)",
+    issueDate: "Issue Date",
+    notes: "Notes (Optional)",
+    notesPlaceholder: "Add any details about this loan...",
+    clearForm: "Clear Form",
+    confirmIssue: "Confirm & Issue Loan",
+    editLoanDetails: "Edit Loan Details",
+    saveChanges: "Save Changes",
+    editBorrower: "Edit Borrower",
+    deleteBorrower: "Delete Borrower",
+    
+    // Details
+    loanStarted: "Loan started",
+    principal: "Principal",
+    paid: "Paid",
+    remaining: "Remaining",
+    recordRepayment: "Record Repayment",
+    amount: "Amount",
+    date: "Date",
+    noteOptional: "Note (Optional)",
+    bankTransfer: "e.g. Bank Transfer",
+    addPayment: "Add Payment",
+    history: "History",
+    transactions: "Transactions",
+    loanGiven: "Loan Given",
+    paymentReceived: "Payment Received",
+    noTransactions: "No transactions yet.",
+    
+    // AI Modal
+    aiAssistant: "AI Assistant",
+    customKey: "CUSTOM GEMINI API KEY",
+    keyDisclaimer: "Your key is saved locally. Leave empty to use default.",
+    askAnything: "Ask me anything about your loans.",
+    languageSupport: "(Supports English & Burmese)",
+    example1: "Summarize my total earnings",
+    example2: "Who owes me the most money?",
+    example3: "Draft a payment reminder...",
+    sendPlaceholder: "Ask about your loans...",
+    
+    // Misc
+    deleteConfirm: "Are you sure you want to delete this borrower history?",
+    errorPrincipal: "Principal amount must be greater than zero.",
+    errorInterest: "Interest amount cannot be negative.",
+    errorRepay: "Repayment amount must be greater than zero.",
+    exampleName: "e.g., John Doe"
+  },
+  mm: {
+    appTitle: "အကြွေးစာရင်း",
+    // Auth
+    secureLedger: "လုံခြုံရေး စနစ်",
+    encryptedVault: "လျှို့ဝှက် ခန်း",
+    createPin: "PIN နံပါတ်တစ်ခု ဖန်တီးပါ။ ၎င်းကို သင်၏ဒေတာများကို လုံခြုံစေရန် အသုံးပြုပါမည်။",
+    enterPinDesc: "ဒေတာများကို ကြည့်ရှုရန် PIN နံပါတ် ရိုက်ထည့်ပါ။",
+    enterPin: "PIN ရိုက်ထည့်ပါ",
+    confirmPin: "PIN အတည်ပြုပါ",
+    decryptUnlock: "ဖွင့်မည်",
+    encryptStart: "စတင်မည်",
+    processing: "ဆောင်ရွက်နေပါသည်...",
+    forgotPin: "PIN မေ့သွားလား?",
+    emergencyReset: "အရေးပေါ် ပြန်လည်စတင်ခြင်း",
+    resetWarning: "လုံခြုံရေးအရ၊ PIN ပြန်လည်သတ်မှတ်ပါက ဒေတာအားလုံး အပြီးတိုင် ပျက်စီးသွားပါမည်။",
+    deleteReset: "ဒေတာအားလုံးဖျက်ပြီး ပြန်စမည်",
+    cancel: "မလုပ်တော့ပါ",
+    pinError: "PIN သည် အနည်းဆုံး ၄ လုံး ရှိရမည်",
+    pinMismatch: "PIN နံပါတ် မကိုက်ညီပါ",
+    authError: "PIN မှားယွင်းနေသည် (သို့) ဒေတာ ပျက်စီးနေသည်။",
+    
+    // Nav
+    dashboard: "ပင်မစာမျက်နှာ",
+    borrowers: "ချေးငှားသူများ",
+    newLoan: "အသစ်ချေးမည်",
+    askAssistant: "AI အကူအညီ",
+    lockNow: "ပိတ်မည်",
+    
+    // Dashboard
+    financialOverview: "ငွေကြေး သုံးသပ်ချက်",
+    trackPortfolio: "သင်၏ ချေးငွေလုပ်ငန်း ဆောင်ရွက်ချက်များ",
+    totalLent: "စုစုပေါင်း ချေးငွေ",
+    totalRepaid: "စုစုပေါင်း ပြန်ရငွေ",
+    totalInterest: "စုစုပေါင်း အတိုး",
+    outstandingBalance: "ရရန်ကျန်ငွေ",
+    portfolioDist: "ချေးငွေ ခွဲဝေမှု",
+    noActiveLoans: "ချေးငွေများ မရှိသေးပါ",
+    createOne: "ယခု ဖန်တီးမည်",
+    recentBorrowers: "လတ်တလော ချေးငှားသူများ",
+    viewAll: "အားလုံးကြည့်မည်",
+    noData: "ဒေတာ မရှိပါ။",
+    due: "ကျန်ငွေ",
+    fixedAmount: "သတ်မှတ်ပမာဏ",
+    
+    // Borrowers List
+    allBorrowers: "ချေးငှားသူများ အားလုံး",
+    searchPlaceholder: "အမည်ဖြင့် ရှာဖွေရန်...",
+    noMatch: "ရှာဖွေမှုနှင့် ကိုက်ညီသူ မရှိပါ။",
+    clearSearch: "ရှာဖွေမှု ဖျက်မည်",
+    noBorrowersYet: "ချေးငှားသူများ မရှိသေးပါ။",
+    since: "စတင်ရက်",
+    interest: "အတိုး",
+    balanceDue: "ပေးသွင်းရန်",
+    
+    // Status
+    active: "လက်ကျန်ရှိ",
+    paidOff: "ကြေပြီး",
+    
+    // New Loan / Edit
+    issueNewLoan: "ချေးငွေအသစ် ထုတ်ပေးမည်",
+    borrowerName: "ချေးယူသူ အမည်",
+    principalAmount: "အရင်း ပမာဏ",
+    fixedInterestLabel: "အတိုး ($)",
+    issueDate: "ထုတ်ပေးသည့် ရက်စွဲ",
+    notes: "မှတ်ချက် (ရှိလျှင်)",
+    notesPlaceholder: "ချေးငွေအကြောင်း အသေးစိတ်...",
+    clearForm: "ဖောင်ရှင်းမည်",
+    confirmIssue: "အတည်ပြုပြီး ထုတ်ပေးမည်",
+    editLoanDetails: "ချေးငွေ အချက်အလက် ပြင်မည်",
+    saveChanges: "သိမ်းဆည်းမည်",
+    editBorrower: "ပြင်ဆင်ရန်",
+    deleteBorrower: "ပယ်ဖျက်ရန်",
+    
+    // Details
+    loanStarted: "စတင်ချေးငှားသည့်ရက်",
+    principal: "အရင်း",
+    paid: "ပြန်ဆပ်ပြီး",
+    remaining: "ကျန်ငွေ",
+    recordRepayment: "ပြန်ဆပ်ငွေ မှတ်တမ်းတင်မည်",
+    amount: "ပမာဏ",
+    date: "ရက်စွဲ",
+    noteOptional: "မှတ်ချက် (ရှိလျှင်)",
+    bankTransfer: "ဥပမာ - ဘဏ်လွှဲ",
+    addPayment: "ထည့်သွင်းမည်",
+    history: "မှတ်တမ်း",
+    transactions: "အရောင်းအဝယ်များ",
+    loanGiven: "ချေးငွေ ထုတ်ပေးခြင်း",
+    paymentReceived: "ပြန်ဆပ်ငွေ ရရှိခြင်း",
+    noTransactions: "မှတ်တမ်း မရှိသေးပါ။",
+    
+    // AI Modal
+    aiAssistant: "AI လက်ထောက်",
+    customKey: "CUSTOM GEMINI API KEY",
+    keyDisclaimer: "သော့ကို browser တွင်သာ သိမ်းဆည်းထားပါမည်။",
+    askAnything: "ချေးငွေများနှင့် ပတ်သက်၍ မေးမြန်းနိုင်ပါသည်။",
+    languageSupport: "(အင်္ဂလိပ် နှင့် မြန်မာ ဘာသာစကား ရပါသည်)",
+    example1: "စုစုပေါင်း အမြတ် ဘယ်လောက်လဲ",
+    example2: "ဘယ်သူ အကြွေးအများဆုံးလဲ",
+    example3: "ငွေတောင်းရန် စာကြမ်း ရေးပေးပါ...",
+    sendPlaceholder: "မေးခွန်း မေးရန်...",
+    
+    // Misc
+    deleteConfirm: "ဤမှတ်တမ်းကို ဖျက်ရန် သေချာပါသလား?",
+    errorPrincipal: "အရင်းပမာဏသည် သုညထက် များရပါမည်။",
+    errorInterest: "အတိုးနှုန်းသည် အနှုတ်မဖြစ်ရပါ။",
+    errorRepay: "ပြန်ဆပ်ငွေသည် သုညထက် များရပါမည်။",
+    exampleName: "ဥပမာ - ဦးမောင်မောင်"
+  }
+};

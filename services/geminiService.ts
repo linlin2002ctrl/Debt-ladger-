@@ -15,29 +15,22 @@ export const generateFinancialAdvice = async (borrowers: Borrower[], query: stri
   const client = getClient(apiKey);
   if (!client) return "Please provide a valid Gemini API Key to use AI features. Click the settings icon to enter your key.";
 
-  // Sanitize data for privacy
-  // Anonymize names to protect identity
-  const contextData = borrowers.map((b, index) => ({
-    id: `Client-${index + 1}`, // Anonymized ID
-    // Name is deliberately removed to protect privacy
+  // Prepare context data including real names as requested
+  const contextData = borrowers.map((b) => ({
+    name: b.name,
     fixedInterest: b.fixedInterest,
     started: b.startDate,
     transactions: b.transactions.map(t => ({
       type: t.type,
       amount: t.amount,
       date: t.date,
-      // Notes might contain PII, so we rely on the prompt instruction to treat them confidentially
-      // but for "serious security", we should arguably strip them too. 
-      // However, notes are crucial for context (e.g. "Bank transfer"). 
-      // We will include them but the prompt context is anonymized regarding the *Entity Name*.
       note: t.note 
     }))
   }));
 
   const prompt = `
-    You are a helpful financial assistant for a private lender.
-    Here is the current lending data.
-    IMPORTANT: The names have been anonymized to "Client-X" for privacy. 
+    You are a helpful financial assistant for a private personal ledger.
+    Here is the current lending data containing borrower names and transaction history.
     Note: 'fixedInterest' is the total interest amount added to the loan principal manually.
     
     Data:
@@ -45,12 +38,19 @@ export const generateFinancialAdvice = async (borrowers: Borrower[], query: stri
 
     User Query: "${query}"
 
+    CRITICAL INSTRUCTIONS FOR NAMES:
+    1. Do NOT anonymize names.
+    2. Do NOT use placeholders like "Client-1", "Client-2", "Borrower", or "Person".
+    3. You MUST use the exact "name" string provided in the Data JSON (e.g., "U Kyaw", "Daw Mya", "John Doe").
+    4. If the name is in Burmese, output it in Burmese.
+
+    GENERAL INSTRUCTIONS:
     Please provide a concise, helpful answer based on the data.
-    If the user asks for a summary, summarize the total exposure and top debtors (refer to them as Client-1, Client-2, etc.).
+    If the user asks for a summary, summarize the total exposure and top debtors using their Real Names.
     If the user asks about a specific person, analyze their repayment history and remaining balance.
     Keep the tone professional yet friendly.
 
-    IMPORTANT LANGUAGE INSTRUCTION:
+    LANGUAGE INSTRUCTION:
     If the user asks a question in Myanmar (Burmese) language, you MUST reply in Myanmar (Burmese) language.
     Otherwise, reply in the language the user asked in (default to English).
   `;

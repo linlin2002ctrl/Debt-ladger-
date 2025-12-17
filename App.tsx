@@ -22,7 +22,8 @@ import {
   Timer,
   Calendar,
   CheckCircle2,
-  Activity
+  Activity,
+  Globe
 } from 'lucide-react';
 import { 
   BarChart, 
@@ -38,6 +39,7 @@ import { saveEncryptedData, loadRawData, hasData, clearData } from './services/s
 import { encryptData, decryptData } from './utils/encryption';
 import { calculateSummary, formatCurrency, formatDate } from './utils/calculations';
 import AIChatModal from './components/AIChatModal';
+import { translations, Language } from './utils/translations';
 
 // --- Sub-components ---
 
@@ -53,30 +55,36 @@ const LockScreen = ({
   isSetupMode, 
   onUnlock, 
   onReset,
-  isProcessing
+  isProcessing,
+  language,
+  onToggleLanguage
 }: { 
   isSetupMode: boolean; 
   onUnlock: (pin: string) => void;
   onReset: () => void;
   isProcessing: boolean;
+  language: Language;
+  onToggleLanguage: () => void;
 }) => {
   const [pin, setPin] = useState('');
   const [confirmPin, setConfirmPin] = useState('');
   const [error, setError] = useState('');
   const [showResetConfirm, setShowResetConfirm] = useState(false);
+  
+  const t = translations[language];
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
     if (pin.length < 4) {
-      setError('PIN must be at least 4 digits');
+      setError(t.pinError);
       return;
     }
 
     if (isSetupMode) {
       if (pin !== confirmPin) {
-        setError('PINs do not match');
+        setError(t.pinMismatch);
         return;
       }
       onUnlock(pin);
@@ -92,22 +100,22 @@ const LockScreen = ({
           <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-6">
             <AlertTriangle size={32} />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Emergency Reset</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">{t.emergencyReset}</h2>
           <p className="text-gray-600 mb-6">
-            To protect your privacy, resetting your PIN will <span className="font-bold text-red-600">permanently delete all data</span>. This cannot be undone because the data is encrypted with your lost PIN.
+            {t.resetWarning}
           </p>
           <div className="flex flex-col gap-3">
             <button 
               onClick={onReset}
               className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl transition-colors"
             >
-              Delete All Data & Reset
+              {t.deleteReset}
             </button>
             <button 
               onClick={() => setShowResetConfirm(false)}
               className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl transition-colors"
             >
-              Cancel
+              {t.cancel}
             </button>
           </div>
         </div>
@@ -116,7 +124,16 @@ const LockScreen = ({
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4 relative">
+       {/* Language Toggle */}
+       <button 
+          onClick={onToggleLanguage}
+          className="absolute top-6 right-6 text-white/50 hover:text-white flex items-center gap-2 px-3 py-1.5 rounded-full hover:bg-white/10 transition-colors"
+        >
+          <Globe size={18} />
+          <span className="text-sm font-medium uppercase">{language}</span>
+        </button>
+
       <div className="bg-white max-w-sm w-full rounded-2xl p-8 shadow-2xl">
         <div className="flex justify-center mb-6">
           <div className="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center">
@@ -125,12 +142,10 @@ const LockScreen = ({
         </div>
         
         <h2 className="text-2xl font-bold text-center text-gray-900 mb-2">
-          {isSetupMode ? "Secure Your Ledger" : "Encrypted Vault"}
+          {isSetupMode ? t.secureLedger : t.encryptedVault}
         </h2>
         <p className="text-center text-gray-500 mb-8 text-sm">
-          {isSetupMode 
-            ? "Create a PIN. This will be used to encrypt your data." 
-            : "Enter PIN to decrypt and access your data."}
+          {isSetupMode ? t.createPin : t.enterPinDesc}
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -141,7 +156,7 @@ const LockScreen = ({
               pattern="[0-9]*"
               value={pin}
               onChange={(e) => setPin(e.target.value)}
-              placeholder={isSetupMode ? "Create PIN" : "Enter PIN"}
+              placeholder={isSetupMode ? "Create PIN" : t.enterPin}
               className="w-full text-center text-2xl tracking-widest px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-indigo-600 focus:ring-0 outline-none transition-colors"
               autoFocus
               disabled={isProcessing}
@@ -156,7 +171,7 @@ const LockScreen = ({
                 pattern="[0-9]*"
                 value={confirmPin}
                 onChange={(e) => setConfirmPin(e.target.value)}
-                placeholder="Confirm PIN"
+                placeholder={t.confirmPin}
                 className="w-full text-center text-2xl tracking-widest px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-indigo-600 focus:ring-0 outline-none transition-colors"
                 disabled={isProcessing}
               />
@@ -174,7 +189,7 @@ const LockScreen = ({
             disabled={isProcessing}
             className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white font-bold py-4 rounded-xl transition-colors shadow-lg shadow-indigo-200 mt-2 flex justify-center"
           >
-            {isProcessing ? "Processing..." : (isSetupMode ? "Encrypt & Start" : "Decrypt & Unlock")}
+            {isProcessing ? t.processing : (isSetupMode ? t.encryptStart : t.decryptUnlock)}
           </button>
         </form>
 
@@ -183,7 +198,7 @@ const LockScreen = ({
             onClick={() => setShowResetConfirm(true)}
             className="w-full text-center text-gray-400 text-xs mt-6 hover:text-gray-600"
           >
-            Forgot PIN?
+            {t.forgotPin}
           </button>
         )}
       </div>
@@ -192,16 +207,16 @@ const LockScreen = ({
 };
 
 // Helper function for status badge styling
-const getStatusParams = (remainingBalance: number) => {
+const getStatusParams = (remainingBalance: number, t: any) => {
   if (remainingBalance <= 0) {
     return { 
-      label: 'Paid Off', 
+      label: t.paidOff, 
       className: 'bg-emerald-100 text-emerald-700 border-emerald-200', 
       icon: <CheckCircle2 size={12} strokeWidth={2.5} /> 
     };
   }
   return { 
-    label: 'Active', 
+    label: t.active, 
     className: 'bg-blue-50 text-blue-700 border-blue-200', 
     icon: <Activity size={12} strokeWidth={2.5} /> 
   };
@@ -213,6 +228,19 @@ export default function App() {
   const [sessionPin, setSessionPin] = useState<string | null>(null);
   const [isSetupMode, setIsSetupMode] = useState(false);
   const [isAuthProcessing, setIsAuthProcessing] = useState(false);
+  
+  // Language State
+  const [language, setLanguage] = useState<Language>(() => {
+    return (localStorage.getItem('app_language') as Language) || 'en';
+  });
+
+  const toggleLanguage = () => {
+    const newLang = language === 'en' ? 'mm' : 'en';
+    setLanguage(newLang);
+    localStorage.setItem('app_language', newLang);
+  };
+  
+  const t = translations[language];
 
   // App Data State
   const [borrowers, setBorrowers] = useState<Borrower[]>([]);
@@ -223,7 +251,6 @@ export default function App() {
   const [isEditing, setIsEditing] = useState(false);
 
   // Auto-lock Ref
-  // Fix: Use ReturnType<typeof setTimeout> to handle timeout refs correctly in browser environment
   const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Form State
@@ -313,7 +340,7 @@ export default function App() {
         }
       }
     } catch (e) {
-      alert("Incorrect PIN or Data Corruption.");
+      alert(t.authError);
     } finally {
       setIsAuthProcessing(false);
     }
@@ -349,12 +376,12 @@ export default function App() {
     const interest = parseFloat(newInterest);
 
     if (isNaN(principal) || principal <= 0) {
-      alert("Principal amount must be greater than zero.");
+      alert(t.errorPrincipal);
       return;
     }
 
     if (isNaN(interest) || interest < 0) {
-      alert("Interest amount cannot be negative.");
+      alert(t.errorInterest);
       return;
     }
 
@@ -385,7 +412,7 @@ export default function App() {
 
     const amount = parseFloat(repayAmount);
     if (isNaN(amount) || amount <= 0) {
-      alert("Repayment amount must be greater than zero.");
+      alert(t.errorRepay);
       return;
     }
 
@@ -431,11 +458,11 @@ export default function App() {
     const interest = parseFloat(newInterest);
 
     if (isNaN(principal) || principal <= 0) {
-      alert("Principal amount must be greater than zero.");
+      alert(t.errorPrincipal);
       return;
     }
     if (isNaN(interest) || interest < 0) {
-      alert("Interest amount cannot be negative.");
+      alert(t.errorInterest);
       return;
     }
 
@@ -487,7 +514,7 @@ export default function App() {
   };
 
   const deleteBorrower = (id: string) => {
-    if (window.confirm("Are you sure you want to delete this borrower history?")) {
+    if (window.confirm(t.deleteConfirm)) {
       setBorrowers(borrowers.filter(b => b.id !== id));
       setView('borrowers');
     }
@@ -569,6 +596,8 @@ export default function App() {
       onUnlock={handleUnlockAttempt} 
       onReset={handleFactoryReset} 
       isProcessing={isAuthProcessing}
+      language={language}
+      onToggleLanguage={toggleLanguage}
     />;
   }
 
@@ -580,7 +609,7 @@ export default function App() {
           <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold">
             D
           </div>
-          <span className="text-xl font-bold text-gray-800">Debt Ledger</span>
+          <span className="text-xl font-bold text-gray-800">{t.appTitle}</span>
         </div>
         
         <div className="space-y-1">
@@ -588,29 +617,36 @@ export default function App() {
             onClick={() => setView('dashboard')}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${view === 'dashboard' ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-50'}`}
           >
-            <LayoutDashboard size={20} /> Dashboard
+            <LayoutDashboard size={20} /> {t.dashboard}
           </button>
           <button 
             onClick={() => setView('borrowers')}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${view === 'borrowers' ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-50'}`}
           >
-            <Users size={20} /> Borrowers
+            <Users size={20} /> {t.borrowers}
           </button>
           <button 
             onClick={() => setView('add')}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${view === 'add' ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-50'}`}
           >
-            <Plus size={20} /> New Loan
+            <Plus size={20} /> {t.newLoan}
           </button>
         </div>
 
         <div className="mt-auto space-y-2">
           <button 
+            onClick={toggleLanguage}
+            className="w-full flex items-center gap-2 justify-center text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 p-3 rounded-xl transition-colors text-sm font-medium"
+          >
+            <Globe size={16} />
+            <span>{language === 'en' ? 'Myanmar' : 'English'}</span>
+          </button>
+          <button 
             onClick={() => setIsAIModalOpen(true)}
             className="w-full flex items-center gap-2 justify-center bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-3 rounded-xl shadow-lg hover:opacity-90 transition-opacity"
           >
             <Sparkles size={18} />
-            Ask Assistant
+            {t.askAssistant}
           </button>
           <button 
             onClick={handleLock}
@@ -618,7 +654,7 @@ export default function App() {
           >
             <div className="flex items-center gap-2">
                <Timer size={16} className="text-gray-400" />
-               <span>Lock Now</span>
+               <span>{t.lockNow}</span>
             </div>
           </button>
         </div>
@@ -626,8 +662,11 @@ export default function App() {
 
       {/* Mobile Top Bar */}
       <div className="md:hidden bg-white p-4 flex justify-between items-center sticky top-0 z-20 border-b">
-        <span className="font-bold text-lg text-gray-800">Debt Ledger</span>
+        <span className="font-bold text-lg text-gray-800">{t.appTitle}</span>
         <div className="flex gap-2">
+          <button onClick={toggleLanguage} className="p-2 text-gray-500 hover:bg-gray-100 rounded-full">
+            <Globe size={20} />
+          </button>
           <button onClick={handleLock} className="p-2 text-gray-500 hover:bg-gray-100 rounded-full">
             <Lock size={20} />
           </button>
@@ -644,19 +683,19 @@ export default function App() {
         {view === 'dashboard' && (
           <div className="space-y-6">
             <header className="mb-6">
-              <h1 className="text-2xl font-bold text-gray-900">Financial Overview</h1>
-              <p className="text-gray-500">Track your lending portfolio performance</p>
+              <h1 className="text-2xl font-bold text-gray-900">{t.financialOverview}</h1>
+              <p className="text-gray-500">{t.trackPortfolio}</p>
             </header>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <StatCard title="Total Lent" value={formatCurrency(totalLent)} color="text-gray-900" />
-              <StatCard title="Total Repaid" value={formatCurrency(totalRepaid)} color="text-emerald-600" />
-              <StatCard title="Total Interest" value={formatCurrency(totalInterest)} color="text-indigo-600" sub="Fixed Amount" />
-              <StatCard title="Outstanding Balance" value={formatCurrency(totalOutstanding)} color="text-rose-600" />
+              <StatCard title={t.totalLent} value={formatCurrency(totalLent)} color="text-gray-900" />
+              <StatCard title={t.totalRepaid} value={formatCurrency(totalRepaid)} color="text-emerald-600" />
+              <StatCard title={t.totalInterest} value={formatCurrency(totalInterest)} color="text-indigo-600" sub={t.fixedAmount} />
+              <StatCard title={t.outstandingBalance} value={formatCurrency(totalOutstanding)} color="text-rose-600" />
             </div>
 
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-              <h3 className="text-lg font-semibold mb-6">Portfolio Distribution</h3>
+              <h3 className="text-lg font-semibold mb-6">{t.portfolioDist}</h3>
               <div className="h-64 w-full">
                 {borrowers.length > 0 ? (
                   <ResponsiveContainer width="100%" height="100%">
@@ -673,8 +712,8 @@ export default function App() {
                   </ResponsiveContainer>
                 ) : (
                   <div className="flex flex-col items-center justify-center h-full text-gray-400">
-                    <p>No active loans</p>
-                    <button onClick={() => setView('add')} className="text-indigo-600 text-sm mt-2 font-medium">Create one now</button>
+                    <p>{t.noActiveLoans}</p>
+                    <button onClick={() => setView('add')} className="text-indigo-600 text-sm mt-2 font-medium">{t.createOne}</button>
                   </div>
                 )}
               </div>
@@ -682,8 +721,8 @@ export default function App() {
 
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
               <div className="p-4 border-b border-gray-100 flex justify-between items-center">
-                <h3 className="font-semibold text-gray-800">Recent Borrowers</h3>
-                <button onClick={() => setView('borrowers')} className="text-sm text-indigo-600 font-medium">View All</button>
+                <h3 className="font-semibold text-gray-800">{t.recentBorrowers}</h3>
+                <button onClick={() => setView('borrowers')} className="text-sm text-indigo-600 font-medium">{t.viewAll}</button>
               </div>
               <div className="divide-y divide-gray-50">
                 {borrowers.slice(0, 5).map(b => (
@@ -694,17 +733,17 @@ export default function App() {
                        </div>
                        <div>
                          <p className="font-medium text-gray-900">{b.name}</p>
-                         <p className="text-xs text-gray-500">Interest: {formatCurrency(b.fixedInterest || 0)}</p>
+                         <p className="text-xs text-gray-500">{t.interest}: {formatCurrency(b.fixedInterest || 0)}</p>
                        </div>
                      </div>
                      <div className="text-right">
                        <p className="font-bold text-gray-900">{formatCurrency(calculateSummary(b).remainingBalance)}</p>
-                       <p className="text-xs text-gray-500">Due</p>
+                       <p className="text-xs text-gray-500">{t.due}</p>
                      </div>
                    </div>
                 ))}
                 {borrowers.length === 0 && (
-                  <div className="p-8 text-center text-gray-500">No data found.</div>
+                  <div className="p-8 text-center text-gray-500">{t.noData}</div>
                 )}
               </div>
             </div>
@@ -716,7 +755,7 @@ export default function App() {
           <div className="space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="flex items-center gap-3">
-                <h1 className="text-2xl font-bold text-gray-900">All Borrowers</h1>
+                <h1 className="text-2xl font-bold text-gray-900">{t.allBorrowers}</h1>
                 <button 
                   onClick={handleExportCSV}
                   className="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
@@ -731,7 +770,7 @@ export default function App() {
                   type="text" 
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search by name..."
+                  placeholder={t.searchPlaceholder}
                   className="w-full sm:w-64 pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-sm transition-all"
                 />
               </div>
@@ -740,7 +779,7 @@ export default function App() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {filteredBorrowers.map(b => {
                 const s = calculateSummary(b);
-                const status = getStatusParams(s.remainingBalance);
+                const status = getStatusParams(s.remainingBalance, t);
                 return (
                   <div key={b.id} onClick={() => { setSelectedBorrowerId(b.id); setView('details'); }} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 cursor-pointer hover:shadow-md transition-shadow relative overflow-hidden group">
                     <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -754,19 +793,19 @@ export default function App() {
                              {status.icon} {status.label}
                           </span>
                         </div>
-                        <p className="text-sm text-gray-500">Since {formatDate(b.startDate)}</p>
+                        <p className="text-sm text-gray-500">{t.since} {formatDate(b.startDate)}</p>
                       </div>
                       <div className="bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full text-xs font-bold">
-                        +{formatCurrency(b.fixedInterest || 0)} Interest
+                        +{formatCurrency(b.fixedInterest || 0)} {t.interest}
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-4 mt-4">
                       <div>
-                        <p className="text-xs text-gray-500">Principal</p>
+                        <p className="text-xs text-gray-500">{t.principal}</p>
                         <p className="font-medium">{formatCurrency(s.principal)}</p>
                       </div>
                       <div>
-                        <p className="text-xs text-gray-500">Balance Due</p>
+                        <p className="text-xs text-gray-500">{t.balanceDue}</p>
                         <p className={`font-bold ${s.remainingBalance > 0 ? 'text-rose-600' : 'text-emerald-600'}`}>
                           {formatCurrency(s.remainingBalance)}
                         </p>
@@ -778,13 +817,13 @@ export default function App() {
             </div>
             {filteredBorrowers.length === 0 && borrowers.length > 0 && (
                <div className="text-center py-12 text-gray-400 bg-white rounded-2xl border border-gray-100 border-dashed">
-                 <p>No borrowers match your search.</p>
-                 <button onClick={() => setSearchQuery('')} className="text-indigo-600 font-medium text-sm mt-2">Clear search</button>
+                 <p>{t.noMatch}</p>
+                 <button onClick={() => setSearchQuery('')} className="text-indigo-600 font-medium text-sm mt-2">{t.clearSearch}</button>
                </div>
             )}
              {borrowers.length === 0 && (
                <div className="text-center py-12 text-gray-400">
-                 <p>No borrowers yet.</p>
+                 <p>{t.noBorrowersYet}</p>
                </div>
             )}
           </div>
@@ -797,25 +836,25 @@ export default function App() {
               <button onClick={() => setView('dashboard')} className="p-2 hover:bg-gray-100 rounded-full">
                 <ArrowDownLeft className="rotate-45" />
               </button>
-              <h1 className="text-2xl font-bold text-gray-900">Issue New Loan</h1>
+              <h1 className="text-2xl font-bold text-gray-900">{t.issueNewLoan}</h1>
             </header>
 
             <form onSubmit={handleAddBorrower} className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 space-y-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Borrower Name</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t.borrowerName}</label>
                 <input 
                   type="text" 
                   value={newName}
                   onChange={e => setNewName(e.target.value)}
                   className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 outline-none"
-                  placeholder="e.g., John Doe"
+                  placeholder={t.exampleName}
                   required
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Principal Amount</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">{t.principalAmount}</label>
                   <div className="relative">
                     <span className="absolute left-3 top-3 text-gray-400">$</span>
                     <input 
@@ -832,7 +871,7 @@ export default function App() {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Fixed Interest ($)</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">{t.fixedInterestLabel}</label>
                   <div className="relative">
                     <span className="absolute left-3 top-3 text-gray-400">$</span>
                     <input 
@@ -851,7 +890,7 @@ export default function App() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Issue Date</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t.issueDate}</label>
                 <input 
                   type="date" 
                   value={newDate}
@@ -862,12 +901,12 @@ export default function App() {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Notes (Optional)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t.notes}</label>
                 <textarea 
                   value={newNote}
                   onChange={e => setNewNote(e.target.value)}
                   className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 outline-none resize-none h-24"
-                  placeholder="Add any details about this loan..."
+                  placeholder={t.notesPlaceholder}
                 />
               </div>
 
@@ -877,13 +916,13 @@ export default function App() {
                   onClick={resetForm}
                   className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-4 rounded-xl transition-colors"
                  >
-                   Clear Form
+                   {t.clearForm}
                  </button>
                  <button 
                   type="submit" 
                   className="flex-[2] bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-xl transition-colors shadow-lg shadow-indigo-200"
                  >
-                   Confirm & Issue Loan
+                   {t.confirmIssue}
                  </button>
               </div>
             </form>
@@ -902,7 +941,7 @@ export default function App() {
                   <div className="flex items-center gap-3">
                     <h1 className="text-2xl font-bold text-gray-900">{selectedBorrower.name}</h1>
                     {(() => {
-                      const status = getStatusParams(selectedSummary.remainingBalance);
+                      const status = getStatusParams(selectedSummary.remainingBalance, t);
                       return (
                          <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide border flex items-center gap-1.5 ${status.className}`}>
                             {status.icon} {status.label}
@@ -910,21 +949,21 @@ export default function App() {
                       );
                     })()}
                   </div>
-                  <p className="text-gray-500 text-sm">Loan started {formatDate(selectedBorrower.startDate)}</p>
+                  <p className="text-gray-500 text-sm">{t.loanStarted} {formatDate(selectedBorrower.startDate)}</p>
                 </div>
               </div>
               <div className="flex gap-2">
                 <button 
                   onClick={() => startEditing(selectedBorrower)}
                   className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg"
-                  title="Edit Borrower"
+                  title={t.editBorrower}
                 >
                   <Pencil size={20} />
                 </button>
                 <button 
                   onClick={() => deleteBorrower(selectedBorrower.id)}
                   className="p-2 text-rose-500 hover:bg-rose-50 rounded-lg"
-                  title="Delete Borrower"
+                  title={t.deleteBorrower}
                 >
                   <Trash2 size={20} />
                 </button>
@@ -933,9 +972,9 @@ export default function App() {
 
             {isEditing ? (
               <form onSubmit={handleSaveEdit} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-4">
-                 <h3 className="font-bold text-lg text-gray-800">Edit Loan Details</h3>
+                 <h3 className="font-bold text-lg text-gray-800">{t.editLoanDetails}</h3>
                  <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Borrower Name</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t.borrowerName}</label>
                   <input 
                     type="text" 
                     value={newName}
@@ -946,7 +985,7 @@ export default function App() {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Principal ($)</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t.principal} ($)</label>
                     <input 
                       type="number" 
                       value={newAmount}
@@ -959,7 +998,7 @@ export default function App() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Fixed Interest ($)</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t.fixedInterestLabel}</label>
                     <input 
                       type="number" 
                       value={newInterest}
@@ -973,9 +1012,9 @@ export default function App() {
                   </div>
                 </div>
                 <div className="flex gap-3 mt-4">
-                  <button type="button" onClick={cancelEdit} className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 rounded-lg">Cancel</button>
+                  <button type="button" onClick={cancelEdit} className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 rounded-lg">{t.cancel}</button>
                   <button type="submit" className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 rounded-lg flex items-center justify-center gap-2">
-                    <Save size={18} /> Save Changes
+                    <Save size={18} /> {t.saveChanges}
                   </button>
                 </div>
               </form>
@@ -984,19 +1023,19 @@ export default function App() {
                 {/* Summary Cards */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
                   <div className="bg-white p-4 rounded-xl border border-gray-200">
-                    <p className="text-gray-500 text-xs uppercase font-bold tracking-wider">Principal</p>
+                    <p className="text-gray-500 text-xs uppercase font-bold tracking-wider">{t.principal}</p>
                     <p className="text-xl font-bold mt-1">{formatCurrency(selectedSummary.principal)}</p>
                   </div>
                   <div className="bg-white p-4 rounded-xl border border-gray-200">
-                    <p className="text-gray-500 text-xs uppercase font-bold tracking-wider">Fixed Interest</p>
+                    <p className="text-gray-500 text-xs uppercase font-bold tracking-wider">{t.fixedInterestLabel.replace('($)', '')}</p>
                     <p className="text-xl font-bold mt-1 text-indigo-600">+{formatCurrency(selectedSummary.interestAccrued)}</p>
                   </div>
                   <div className="bg-white p-4 rounded-xl border border-gray-200">
-                    <p className="text-gray-500 text-xs uppercase font-bold tracking-wider">Paid</p>
+                    <p className="text-gray-500 text-xs uppercase font-bold tracking-wider">{t.paid}</p>
                     <p className="text-xl font-bold mt-1 text-emerald-600">-{formatCurrency(selectedSummary.totalRepaid)}</p>
                   </div>
                   <div className="bg-slate-900 p-4 rounded-xl border border-slate-800 text-white">
-                    <p className="text-slate-400 text-xs uppercase font-bold tracking-wider">Remaining</p>
+                    <p className="text-slate-400 text-xs uppercase font-bold tracking-wider">{t.remaining}</p>
                     <p className="text-xl font-bold mt-1">{formatCurrency(selectedSummary.remainingBalance)}</p>
                   </div>
                 </div>
@@ -1006,11 +1045,11 @@ export default function App() {
                   <div className="lg:col-span-1">
                     <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 sticky top-24">
                       <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
-                        <Wallet size={18} /> Record Repayment
+                        <Wallet size={18} /> {t.recordRepayment}
                       </h3>
                       <form onSubmit={handleAddRepayment} className="space-y-4">
                         <div>
-                          <label className="block text-xs font-semibold text-gray-500 mb-1">Amount</label>
+                          <label className="block text-xs font-semibold text-gray-500 mb-1">{t.amount}</label>
                           <div className="relative">
                             <span className="absolute left-3 top-2.5 text-gray-400">$</span>
                             <input 
@@ -1026,7 +1065,7 @@ export default function App() {
                           </div>
                         </div>
                         <div>
-                          <label className="block text-xs font-semibold text-gray-500 mb-1">Date</label>
+                          <label className="block text-xs font-semibold text-gray-500 mb-1">{t.date}</label>
                           <input 
                             type="date" 
                             value={repayDate}
@@ -1035,17 +1074,17 @@ export default function App() {
                           />
                         </div>
                         <div>
-                          <label className="block text-xs font-semibold text-gray-500 mb-1">Note (Optional)</label>
+                          <label className="block text-xs font-semibold text-gray-500 mb-1">{t.noteOptional}</label>
                           <input 
                             type="text" 
                             value={repayNote}
                             onChange={e => setRepayNote(e.target.value)}
                             className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 outline-none"
-                            placeholder="e.g. Bank Transfer"
+                            placeholder={t.bankTransfer}
                           />
                         </div>
                         <button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 rounded-lg transition-colors">
-                          Add Payment
+                          {t.addPayment}
                         </button>
                       </form>
                     </div>
@@ -1055,8 +1094,8 @@ export default function App() {
                   <div className="lg:col-span-2">
                     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col h-full max-h-[600px]">
                       <div className="p-4 bg-white border-b border-gray-100 flex justify-between items-center sticky top-0 z-10">
-                        <h3 className="font-bold text-gray-800">History</h3>
-                        <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">{selectedBorrower.transactions.length} Transactions</span>
+                        <h3 className="font-bold text-gray-800">{t.history}</h3>
+                        <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">{selectedBorrower.transactions.length} {t.transactions}</span>
                       </div>
                       <div className="overflow-y-auto custom-scrollbar">
                         {(() => {
@@ -1069,7 +1108,7 @@ export default function App() {
                            });
                            
                            if (Object.keys(groups).length === 0) {
-                             return <div className="p-8 text-center text-gray-400">No transactions yet.</div>;
+                             return <div className="p-8 text-center text-gray-400">{t.noTransactions}</div>;
                            }
 
                            return Object.keys(groups).map(date => (
@@ -1091,7 +1130,7 @@ export default function App() {
                                        </div>
                                        <div>
                                          <p className={`text-sm font-bold ${t.type === 'LOAN' ? 'text-gray-900' : 'text-gray-900'}`}>
-                                           {t.type === 'LOAN' ? 'Loan Given' : 'Payment Received'}
+                                           {t.type === 'LOAN' ? t.loanGiven : t.paymentReceived}
                                          </p>
                                          {t.note && (
                                            <p className="text-xs text-gray-500 mt-0.5 max-w-[200px] truncate">
@@ -1126,11 +1165,11 @@ export default function App() {
       <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around p-3 pb-safe z-30">
         <button onClick={() => setView('dashboard')} className={`flex flex-col items-center ${view === 'dashboard' ? 'text-indigo-600' : 'text-gray-400'}`}>
           <LayoutDashboard size={20} />
-          <span className="text-[10px] mt-1">Home</span>
+          <span className="text-[10px] mt-1">{language === 'mm' ? 'ပင်မ' : 'Home'}</span>
         </button>
         <button onClick={() => setView('borrowers')} className={`flex flex-col items-center ${view === 'borrowers' ? 'text-indigo-600' : 'text-gray-400'}`}>
           <Users size={20} />
-          <span className="text-[10px] mt-1">People</span>
+          <span className="text-[10px] mt-1">{language === 'mm' ? 'လူများ' : 'People'}</span>
         </button>
         <button onClick={() => setView('add')} className={`flex flex-col items-center ${view === 'add' ? 'text-indigo-600' : 'text-gray-400'}`}>
           <div className="bg-indigo-600 text-white p-2 rounded-full -mt-6 shadow-lg border-4 border-white">
@@ -1147,6 +1186,7 @@ export default function App() {
         isOpen={isAIModalOpen} 
         onClose={() => setIsAIModalOpen(false)} 
         borrowers={borrowers} 
+        language={language}
       />
     </div>
   );

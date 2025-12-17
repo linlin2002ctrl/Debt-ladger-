@@ -2,19 +2,23 @@ import React, { useState, useEffect } from 'react';
 import { X, Send, Bot, Loader2, Settings, Key } from 'lucide-react';
 import { generateFinancialAdvice } from '../services/geminiService';
 import { Borrower } from '../types';
+import { translations, Language } from '../utils/translations';
 
 interface AIChatModalProps {
   isOpen: boolean;
   onClose: () => void;
   borrowers: Borrower[];
+  language: Language;
 }
 
-const AIChatModal: React.FC<AIChatModalProps> = ({ isOpen, onClose, borrowers }) => {
+const AIChatModal: React.FC<AIChatModalProps> = ({ isOpen, onClose, borrowers, language }) => {
   const [input, setInput] = useState('');
   const [response, setResponse] = useState('');
   const [loading, setLoading] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [apiKey, setApiKey] = useState('');
+  
+  const t = translations[language];
 
   useEffect(() => {
     // Load API key from local storage on mount
@@ -53,7 +57,7 @@ const AIChatModal: React.FC<AIChatModalProps> = ({ isOpen, onClose, borrowers })
         <div className="p-4 border-b flex justify-between items-center bg-indigo-600 text-white">
           <div className="flex items-center gap-2">
             <Bot size={20} />
-            <h3 className="font-semibold">AI Assistant</h3>
+            <h3 className="font-semibold">{t.aiAssistant}</h3>
           </div>
           <div className="flex items-center gap-2">
             <button 
@@ -74,19 +78,19 @@ const AIChatModal: React.FC<AIChatModalProps> = ({ isOpen, onClose, borrowers })
           <div className="bg-indigo-50 p-4 border-b border-indigo-100 animate-in slide-in-from-top-2 duration-200">
             <label className="block text-xs font-bold text-indigo-900 mb-2 flex items-center gap-1">
               <Key size={14} /> 
-              CUSTOM GEMINI API KEY
+              {t.customKey}
             </label>
             <div className="flex gap-2">
               <input 
                 type="password" 
                 value={apiKey}
                 onChange={(e) => handleSaveKey(e.target.value)}
-                placeholder="Paste your API Key here (starts with AIza...)"
+                placeholder="AIza..."
                 className="flex-1 text-sm border border-indigo-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none"
               />
             </div>
             <p className="text-[10px] text-indigo-600 mt-2">
-              Your key is saved locally in your browser. Leave empty to use the default system key.
+              {t.keyDisclaimer}
             </p>
           </div>
         )}
@@ -95,12 +99,12 @@ const AIChatModal: React.FC<AIChatModalProps> = ({ isOpen, onClose, borrowers })
         <div className="flex-1 p-6 overflow-y-auto bg-gray-50">
           {!response && !loading && (
             <div className="text-center text-gray-500 mt-8">
-              <p className="mb-2">Ask me anything about your loans.</p>
-              <p className="text-xs text-gray-400 mb-4">(Supports English & Myanmar)</p>
+              <p className="mb-2">{t.askAnything}</p>
+              <p className="text-xs text-gray-400 mb-4">{t.languageSupport}</p>
               <div className="text-sm space-y-2">
-                <span className="block bg-white border px-3 py-1 rounded-full cursor-pointer hover:bg-gray-100" onClick={() => setInput("Summarize my total earnings")}>"Summarize my total earnings"</span>
-                <span className="block bg-white border px-3 py-1 rounded-full cursor-pointer hover:bg-gray-100" onClick={() => setInput("Who owes me the most money?")}>"Who owes me the most money?"</span>
-                <span className="block bg-white border px-3 py-1 rounded-full cursor-pointer hover:bg-gray-100" onClick={() => setInput("Draft a payment reminder for...")}>"Draft a reminder..."</span>
+                <span className="block bg-white border px-3 py-1 rounded-full cursor-pointer hover:bg-gray-100" onClick={() => setInput(t.example1)}>"{t.example1}"</span>
+                <span className="block bg-white border px-3 py-1 rounded-full cursor-pointer hover:bg-gray-100" onClick={() => setInput(t.example2)}>"{t.example2}"</span>
+                <span className="block bg-white border px-3 py-1 rounded-full cursor-pointer hover:bg-gray-100" onClick={() => setInput(t.example3)}>"{t.example3}"</span>
               </div>
             </div>
           )}
@@ -125,7 +129,7 @@ const AIChatModal: React.FC<AIChatModalProps> = ({ isOpen, onClose, borrowers })
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask about your loans..."
+              placeholder={t.sendPlaceholder}
               className="flex-1 border rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 outline-none"
               onKeyDown={(e) => e.key === 'Enter' && handleSend()}
             />
